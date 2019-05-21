@@ -92,6 +92,26 @@ namespace AXClient
                         sock.Receive(type);
                         var evnt = Encoding.UTF8.GetString(type);
                         Console.WriteLine(evnt);
+                        sock.Send(Encoding.UTF8.GetBytes("y"));
+                        byte[] length_bytes = new byte[4];//длина следующего сообщения
+                        sock.Receive(length_bytes);
+                        int length = BitConverter.ToInt32(length_bytes, 0);
+                        sock.Send(Encoding.UTF8.GetBytes("y"));
+                        byte[] mess_bytes = new byte[length];
+                        while (sock.Available < length)
+                        {
+                            System.Threading.Thread.Sleep(100);
+                        }
+                        sock.Receive(mess_bytes);
+                        var mess_str = Encoding.UTF8.GetString(mess_bytes);
+                        Console.WriteLine(mess_str);
+                        sock.Send(Encoding.UTF8.GetBytes("y"));
+                        var answer = Encoding.UTF8.GetBytes(accept(mess_str));
+                        sock.Send(BitConverter.GetBytes(answer.Length));
+                        var result = new byte[1];
+                        sock.Receive(result);
+                        sock.Send(answer);
+                        sock.Receive(result);
                     }
                     else
                     {
@@ -118,8 +138,6 @@ namespace AXClient
                         var answer = Encoding.UTF8.GetString(answer_bytes);
                         message = "";
                         sock.Send(Encoding.UTF8.GetBytes("y"));
-
-
                     }
                 }
                 catch(Exception ee)
@@ -133,6 +151,10 @@ namespace AXClient
             }
         }
 
+        public string accept(string msg)
+        {
+            return "";
+        }
         private void button1_Click(object sender, EventArgs e)
         {
             message = textBox1.Text;
